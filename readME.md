@@ -108,7 +108,7 @@ const connection = new signalR.HubConnectionBuilder()
   .build();
 
 connection.on("OnSet", (key, value) => {
-  console.log("📥 Received from hub:", key, value);
+  console.log("Received from hub:", key, value);
 });
 
 async function start() {
@@ -149,9 +149,9 @@ node src/test-client.js
 
 ✅ Expected Output:
 ```
-✅ Connected to SignalR hub
-📤 Sent test set to hub
-📥 Received from hub: testKey testValue
+Connected to SignalR hub
+Sent test set to hub
+Received from hub: testKey testValue
 ```
 
 ---
