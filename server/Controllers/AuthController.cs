@@ -1,50 +1,55 @@
 using Microsoft.AspNetCore.Mvc;
-using server.Models;
-
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using server.Models;
 
-namespace server.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+namespace server.Controllers
 {
-    [HttpPost("authenticate")]
-    public IActionResult Authenticate([FromBody] LoginModel model)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthController : ControllerBase
     {
-        // Simple hardcoded check
-        if (model.Username == "user" && model.Password == "pass")
+        private readonly IConfiguration _configuration;
+
+        public AuthController(IConfiguration configuration)
         {
-            var token = GenerateJwtToken(model.Username);
-            return Ok(new { success = true, data = new { token } });
+            _configuration = configuration;
         }
 
-        return Unauthorized(new { success = false, error = "Invalid credentials" });
-    }
-
-    private string GenerateJwtToken(string username)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes("supersecretkey1234567890"); // move to config in prod
-
-        var tokenDescriptor = new SecurityTokenDescriptor
+        [HttpPost("authenticate")]
+        public IActionResult Authenticate([FromBody] LoginModel model)
         {
-            Subject = new ClaimsIdentity(new[]
+            if (model.Username != "user" || model.Password != "pass")
             {
-                new Claim("cid", Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iss, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
-            }),
-            Expires = DateTime.UtcNow.AddHours(1),
-            SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256Signature)
-        };
+                return Unauthorized(new { success = false, error = "Invalid credentials" });
+            }
 
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+            var token = GenerateJwtToken(model.Username);
+            return Ok(new { token });
+        }
+
+        private string GenerateJwtToken(string username)
+        {
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured."));
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[] {
+                    new Claim("cid", Guid.NewGuid().ToString())
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                ),
+                Issuer = _configuration["Jwt:Issuer"]
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
     }
 }

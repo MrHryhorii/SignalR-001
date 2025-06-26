@@ -41,3 +41,13 @@ C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\obj\Debug
 C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\obj\Debug\net6.0\server.pdb
 C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\obj\Debug\net6.0\server.genruntimeconfig.cache
 C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\obj\Debug\net6.0\ref\server.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.Bcl.AsyncInterfaces.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.Bcl.TimeProvider.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll

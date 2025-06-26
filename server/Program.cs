@@ -4,6 +4,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -12,17 +16,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSignalR(); // Adds SignalR to the app's service container
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
 
 
 builder.Services.AddAuthentication(options =>
@@ -34,11 +27,13 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,
-        ValidateAudience = false,
+        ValidateIssuer = true,
+        ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("supersecretkey1234567890")),
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtKey)),
     };
 
     // Allow JWT via query string for SignalR
@@ -56,6 +51,17 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
