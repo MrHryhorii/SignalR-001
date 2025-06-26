@@ -51,3 +51,6 @@ C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug
 C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\FluentValidation.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\FluentValidation.AspNetCore.dll
+C:\Users\grigo\OneDrive\Documents\HodeKode Projects\SignalR-001\server\bin\Debug\net6.0\FluentValidation.DependencyInjectionExtensions.dll
