@@ -18,8 +18,9 @@ const credentials = {
 // Joi validation
 const { error } = authValidator_1.authSchema.validate(credentials);
 if (error) {
+    // Stop processing
     console.error("Validation error:", error.details.map(d => d.message).join("; "));
-    // Зупиняємо виконання
+    // Authenticate
 }
 else {
     authenticate(credentials.username, credentials.password)
