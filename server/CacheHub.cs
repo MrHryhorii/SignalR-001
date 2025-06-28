@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
-using System.Text.Json;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace server;
 public enum LogLevelEnum
@@ -14,9 +15,13 @@ public class ServerConfig
     public LogLevelEnum LogLevel { get; set; } = LogLevelEnum.INFO;
 }
 
+[Authorize]
 public class CacheHub : Hub
 {
-    private static readonly ServerConfig _config = new ServerConfig();
+    private static readonly ServerConfig _config = new();
+    private static readonly IMemoryCache _memoryCache = new MemoryCache(new MemoryCacheOptions());
+    private static readonly SlidingCache _cache = new(_memoryCache, TimeSpan.FromMinutes(10));
+
     public async Task SendSet(string key, string value)
     {
         Console.WriteLine($"Set {key} = {value}");
