@@ -21,6 +21,8 @@ function main() {
             yield client.set("exampleKey", "123");
             // Retrieve the value
             yield client.get("exampleKey");
+            // Retrieve the value of user:1
+            yield client.get("user:1");
             // Update the value or insert if not exists
             yield client.upsert("exampleKey", '{"updated":true}');
             // Retrieve again

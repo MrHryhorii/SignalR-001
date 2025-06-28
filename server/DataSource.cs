@@ -13,4 +13,10 @@ public class DataSource
         _data.TryGetValue(key, out var value);
         return Task.FromResult(value);
     }
+
+     public Task SaveAsync(string key, object value)
+    {
+        _data[key] = value;
+        return Task.CompletedTask;
+    }
 }

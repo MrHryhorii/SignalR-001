@@ -23,6 +23,7 @@ public class CacheHub : Hub
     private static readonly ServerConfig _config = new();
     private static readonly IMemoryCache _memoryCache = new MemoryCache(new MemoryCacheOptions());
     private static readonly SlidingCache _cache = new(_memoryCache, TimeSpan.FromMinutes(10));
+    private static readonly DataSource _dataSource = new();
 
     public async Task SendSet(string key, string value)
     {
@@ -79,38 +80,62 @@ public class CacheHub : Hub
     public async Task<Response> Set(string key, string value, int ttl = 3600000)
     {
         if (_config.Strict && !IsPrimitiveOrJson(value))
-            return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
+        return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
 
-        if (_cache.Exists(key))
-            Log(LogLevelEnum.INFO, $"[SET] Key '{key}' already exists. Overwriting.");
+        var existing = await _dataSource.FetchAsync(key);
+        if (existing != null)
+            return Response.Fail("Key already exists in data source.");
 
-        await _cache.GetOrFetchAsync(key, () => Task.FromResult(value), TimeSpan.FromMilliseconds(ttl));
+        await _dataSource.SaveAsync(key, value);
+        await _cache.GetOrFetchAsync(key, () => Task.FromResult<object?>(value), TimeSpan.FromMilliseconds(ttl));
+
+        Log(LogLevelEnum.INFO, $"[SET] Key '{key}' inserted.");
         return Response.Ok();
     }
 
     public async Task<Response> Get(string key)
     {
-        if (!_cache.Exists(key))
-        {
-            Log(LogLevelEnum.INFO, $"[GET] Key '{key}' not found in cache.");
-            return Response.Fail("Key not found");
-        }
+        // Спробувати дістати з кешу або з джерела
+        var value = await _cache.GetOrFetchAsync<object?>(
+            key,
+            async () =>
+            {
+                var fetched = await _dataSource.FetchAsync(key);
+                if (fetched == null)
+                {
+                    Log(LogLevelEnum.INFO, $"[GET] Key '{key}' not found in cache or data source.");
+                }
+                else
+                {
+                    Log(LogLevelEnum.INFO, $"[GET] Key '{key}' loaded from data source.");
+                }
+                return fetched;
+            },
+            TimeSpan.FromMinutes(10) // TTL за замовчуванням
+        );
 
-        var value = await _cache.GetOrFetchAsync(key, () => Task.FromResult(""), TimeSpan.Zero); // TTL not extended
+        // Якщо все ще null — не знайдено
+        if (value == null)
+            return Response.Fail("Key not found");
+
         return Response.Ok(value);
     }
 
     public async Task<Response> Upsert(string key, string value, int ttl = 3600000)
     {
         if (_config.Strict && !IsPrimitiveOrJson(value))
-            return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
+        return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
 
-        if (_cache.Exists(key))
-            Log(LogLevelEnum.INFO, $"[UPSERT] Key '{key}' already exists. Updating value.");
+        var existing = await _dataSource.FetchAsync(key);
+
+        if (existing != null)
+            Log(LogLevelEnum.INFO, $"[UPSERT] Key '{key}' exists in data source. Updating.");
         else
-            Log(LogLevelEnum.INFO, $"[UPSERT] Key '{key}' does not exist. Inserting new value.");
+            Log(LogLevelEnum.INFO, $"[UPSERT] Key '{key}' not found in data source. Creating new entry.");
 
-        await _cache.GetOrFetchAsync(key, () => Task.FromResult(value), TimeSpan.FromMilliseconds(ttl));
+        await _dataSource.SaveAsync(key, value);
+        await _cache.GetOrFetchAsync(key, () => Task.FromResult<object?>(value), TimeSpan.FromMilliseconds(ttl));
+
         return Response.Ok();
     }
 

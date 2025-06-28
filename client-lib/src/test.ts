@@ -16,6 +16,9 @@ async function main() {
         // Retrieve the value
         await client.get("exampleKey");
 
+        // Retrieve the value of user:1
+        await client.get("user:1");
+
         // Update the value or insert if not exists
         await client.upsert("exampleKey", '{"updated":true}');
 
