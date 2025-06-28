@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
+using server.Models;
 
 
 namespace server;
@@ -74,4 +75,43 @@ public class CacheHub : Hub
             return false;
         }
     }
+
+    public async Task<Response> Set(string key, string value, int ttl = 3600000)
+    {
+        if (_config.Strict && !IsPrimitiveOrJson(value))
+            return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
+
+        if (_cache.Exists(key))
+            Console.WriteLine($"[SET] Key '{key}' already exists. Overwriting.");
+
+        await _cache.GetOrFetchAsync(key, () => Task.FromResult(value), TimeSpan.FromMilliseconds(ttl));
+        return Response.Ok();
+    }
+
+    public async Task<Response> Get(string key)
+    {
+        if (!_cache.Exists(key))
+        {
+            Console.WriteLine($"[GET] Key '{key}' not found in cache.");
+            return Response.Fail("Key not found");
+        }
+
+        var value = await _cache.GetOrFetchAsync(key, () => Task.FromResult(""), TimeSpan.Zero); // TTL not extended
+        return Response.Ok(value);
+    }
+
+    public async Task<Response> Upsert(string key, string value, int ttl = 3600000)
+    {
+        if (_config.Strict && !IsPrimitiveOrJson(value))
+            return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
+
+        if (_cache.Exists(key))
+            Console.WriteLine($"[UPSERT] Key '{key}' already exists. Updating value.");
+        else
+            Console.WriteLine($"[UPSERT] Key '{key}' does not exist. Inserting new value.");
+
+        await _cache.GetOrFetchAsync(key, () => Task.FromResult(value), TimeSpan.FromMilliseconds(ttl));
+        return Response.Ok();
+    }
+
 }
