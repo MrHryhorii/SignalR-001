@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 
 
 namespace server;
@@ -47,6 +48,30 @@ public class CacheHub : Hub
         if ((int)level >= (int)_config.LogLevel)
         {
             Console.WriteLine($"[{level}] {message}");
+        }
+    }
+
+    private bool IsPrimitiveOrJson(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        try
+        {
+            var json = JsonDocument.Parse(value);
+            return json.RootElement.ValueKind switch
+            {
+                JsonValueKind.String or
+                JsonValueKind.Number or
+                JsonValueKind.True or
+                JsonValueKind.False or
+                JsonValueKind.Object => true,
+                _ => false
+            };
+        }
+        catch
+        {
+            return false;
         }
     }
 }

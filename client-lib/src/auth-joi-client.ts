@@ -9,8 +9,9 @@ const credentials = {
 // Joi validation
 const { error } = authSchema.validate(credentials);
 if (error) {
-  console.error("Validation error:", error.details.map(d => d.message).join("; "));
   // Stop processing
+  console.error("Validation error:", error.details.map(d => d.message).join("; "));
+  // Authenticate
 } else {
   authenticate(credentials.username, credentials.password)
     .then(token => {

@@ -53,4 +53,9 @@ public class SlidingCache
             _locks.TryRemove(key, out _); // Optional: remove lock to avoid growth
         }
     }
+    // Check
+    public bool Exists(string key)
+    {
+        return _cache.TryGetValue(key, out _);
+    }
 }
