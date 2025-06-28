@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Text.Json;
 using System.Threading.Tasks;
 
+namespace server;
 public enum LogLevelEnum
 {
     DEBUG, INFO, WARNING, ERROR
