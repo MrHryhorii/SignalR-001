@@ -82,7 +82,7 @@ public class CacheHub : Hub
             return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
 
         if (_cache.Exists(key))
-            Console.WriteLine($"[SET] Key '{key}' already exists. Overwriting.");
+            Log(LogLevelEnum.INFO, $"[SET] Key '{key}' already exists. Overwriting.");
 
         await _cache.GetOrFetchAsync(key, () => Task.FromResult(value), TimeSpan.FromMilliseconds(ttl));
         return Response.Ok();
@@ -92,7 +92,7 @@ public class CacheHub : Hub
     {
         if (!_cache.Exists(key))
         {
-            Console.WriteLine($"[GET] Key '{key}' not found in cache.");
+            Log(LogLevelEnum.INFO, $"[GET] Key '{key}' not found in cache.");
             return Response.Fail("Key not found");
         }
 
@@ -106,9 +106,9 @@ public class CacheHub : Hub
             return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
 
         if (_cache.Exists(key))
-            Console.WriteLine($"[UPSERT] Key '{key}' already exists. Updating value.");
+            Log(LogLevelEnum.INFO, $"[UPSERT] Key '{key}' already exists. Updating value.");
         else
-            Console.WriteLine($"[UPSERT] Key '{key}' does not exist. Inserting new value.");
+            Log(LogLevelEnum.INFO, $"[UPSERT] Key '{key}' does not exist. Inserting new value.");
 
         await _cache.GetOrFetchAsync(key, () => Task.FromResult(value), TimeSpan.FromMilliseconds(ttl));
         return Response.Ok();
