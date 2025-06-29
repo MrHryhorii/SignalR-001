@@ -19,9 +19,9 @@ function main() {
         try {
             yield client.start();
             // Send request to set a value
-            yield client.set("exampleKey", "123");
+            yield client.set("exampleKey", "123", { ttl: 10000 });
             // Retrieve the value
-            yield client.get("exampleKey");
+            yield client.get("exampleKey", { timeout: 5000 });
             // Retrieve the value of user:1
             yield client.get("user:1");
             // Update the value or insert if not exists

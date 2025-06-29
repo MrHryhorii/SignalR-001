@@ -106,16 +106,16 @@ class AuthJoiClient {
         });
     }
     //
-    set(key_1, value_1) {
-        return __awaiter(this, arguments, void 0, function* (key, value, ttl = 3600000) {
-            const result = yield this.connection.invoke("Set", key, value, ttl);
+    set(key, value, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.connection.invoke("Set", key, value, options || {});
             console.log("[SET]", result);
             return result;
         });
     }
-    get(key) {
+    get(key, options) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.connection.invoke("Get", key);
+            const result = yield this.connection.invoke("Get", key, options || {});
             console.log("[GET]", result);
             return result;
         });

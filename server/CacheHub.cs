@@ -83,8 +83,23 @@ public class CacheHub : Hub
         public bool ErrorOnExists { get; set; } = false;
     }
 
-    public async Task<Response> Set(string key, string value, int ttl = 3600000)
+    public class SetOptions
     {
+        public int Ttl { get; set; } = 3600000;
+        public string? Schema { get; set; } = null; // Placeholder
+        public bool Validate { get; set; } = true;
+    }
+
+    public class GetOptions
+    {
+        public int Timeout { get; set; } = 10000;
+        public string? Callback { get; set; } = null; // Placeholder
+    }
+
+    public async Task<Response> Set(string key, string value, SetOptions? options)
+    {
+        int ttl = options?.Ttl ?? 3600000;
+
         if (_config.Strict && !IsPrimitiveOrJson(value))
             return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
 
@@ -99,8 +114,9 @@ public class CacheHub : Hub
         return Response.Ok();
     }
 
-    public async Task<Response> Get(string key)
+    public async Task<Response> Get(string key, GetOptions? options)
     {
+        var timeout = options?.Timeout ?? 10000;
         // get data from cache or storage
         var value = await _cache.GetOrFetchAsync<object?>(
             key,
@@ -117,7 +133,7 @@ public class CacheHub : Hub
                 }
                 return fetched;
             },
-            TimeSpan.FromMinutes(10) // TTL as default 
+            TimeSpan.FromMinutes(timeout) // timeout
         );
 
         // no data

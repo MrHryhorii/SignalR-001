@@ -11,10 +11,10 @@ async function main() {
         await client.start();
 
         // Send request to set a value
-        await client.set("exampleKey", "123");
+        await client.set("exampleKey", "123", { ttl: 10000 });
 
         // Retrieve the value
-        await client.get("exampleKey");
+        await client.get("exampleKey", { timeout: 5000 });
 
         // Retrieve the value of user:1
         await client.get("user:1");

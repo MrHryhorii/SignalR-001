@@ -6,6 +6,17 @@ interface UpsertOptions {
     errorOnExists?: boolean;
 }
 
+export interface SetOptions {
+    ttl?: number;
+    schema?: any; // Joi schema — if we need
+    validate?: boolean;
+}
+
+export interface GetOptions {
+    timeout?: number;
+    callback?: (...args: unknown[]) => void;
+}
+
 export class AuthJoiClient {
     private connection: signalR.HubConnection;
     private token: string | null = null;
@@ -69,14 +80,14 @@ export class AuthJoiClient {
 
     //
 
-    async set(key: string, value: string, ttl: number = 3600000) {
-        const result = await this.connection.invoke("Set", key, value, ttl);
+    async set(key: string, value: string, options?: SetOptions) {
+        const result = await this.connection.invoke("Set", key, value, options || {});
         console.log("[SET]", result);
         return result;
     }
 
-    async get(key: string) {
-        const result = await this.connection.invoke("Get", key);
+    async get(key: string, options?: GetOptions) {
+        const result = await this.connection.invoke("Get", key, options || {});
         console.log("[GET]", result);
         return result;
     }
