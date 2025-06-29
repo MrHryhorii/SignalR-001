@@ -1,20 +1,95 @@
 
-# 📦 SignalR TypeScript Client Module (`client.ts`)
+# 📦 SignalR TypeScript Client (`client.ts`)
 
-This module provides a TypeScript API to interact with a real-time SignalR-based key-value cache server. It manages connection, authentication, and data methods (`set`, `get`, `upsert`, `config`) over WebSocket using the SignalR protocol.
+This file provides a **SignalR client interface** for interacting with a real-time key-value cache server. It handles:
+- Authentication via username/password
+- WebSocket connection over SignalR
+- Cache operations: `set`, `get`, `upsert`
+- Server configuration: `strict`, `logLevel`
+
+Tested via `test.ts`.
 
 ---
 
-## 🔧 Installation
+## 🧪 Quick Start with `test.ts`
 
-Ensure your project has the following dependencies installed:
+1. Make sure the server is running:
+
+```bash
+cd ../server
+dotnet run
+```
+
+> Server is expected to run at `http://localhost:5000` by default.
+
+2. Compile and run the client:
+
+```bash
+cd ../client-lib
+npx tsc
+node dist/test.js
+```
+
+---
+
+## 🧰 Client API (Functionality)
+
+The client manages both **authentication and SignalR connection**, then exposes methods for key-value interactions.
+
+### 🔐 `connect(auth: { username: string; password: string; serverUrl?: string })`
+
+Authenticates via `/api/authenticate`, then connects to `/hub/cache` using the received JWT.
+
+### 💾 `set<T>(key: string, value: T, options?: { ttl?: number; validate?: boolean })`
+
+Sends a key-value pair to be stored in the cache with optional TTL (time to live) and validation.
+
+### 📥 `get<T>(key: string)`
+
+Fetches the value associated with a key from the cache or backing store.
+
+### 🔁 `upsert<T>(key: string, value: T, options?: { ttl?: number; errorOnExists?: boolean })`
+
+Adds a new value or updates an existing one. If `errorOnExists` is true, it fails if the key exists.
+
+### ⚙️ `config(settings: { strict: boolean; logLevel: number })`
+
+Changes server configuration. Enables strict JSON validation or sets logging level.
+
+---
+
+## 💡 Example from `test.ts`
+
+```ts
+import { client } from "./client";
+
+await client.connect({
+  username: "user",
+  password: "pass",
+  serverUrl: "http://localhost:5000"
+});
+
+await client.set("count", 1);
+const value = await client.get("count");
+console.log("Got:", value);
+
+await client.upsert("count", 2, { errorOnExists: false });
+
+await client.config({ strict: true, logLevel: 1 });
+```
+
+---
+
+## 📦 Package Requirements
+
+Install required packages before compiling:
 
 ```bash
 npm install @microsoft/signalr joi
-npx tsc --init    # if you haven't already
+npx tsc --init
 ```
 
-In `tsconfig.json`, add:
+In your `tsconfig.json`, ensure:
 
 ```json
 "include": ["src"]
@@ -22,99 +97,8 @@ In `tsconfig.json`, add:
 
 ---
 
-## 🛠️ Usage
+## 📝 Summary
 
-Import and use the client in your project:
-
-```ts
-import { client } from "./client";
-
-(async () => {
-  await client.connect({ username: "user", password: "pass" });
-
-  await client.set("someKey", { value: 42 });
-  const result = await client.get("someKey");
-  console.log("Result:", result);
-
-  await client.upsert("someKey", { value: 99 });
-  await client.config({ strict: true, logLevel: 1 }); // INFO
-})();
-```
-
----
-
-## 📚 API
-
-### `client.connect(credentials: { username: string, password: string }): Promise<void>`
-Authenticates the client and connects to the SignalR hub using a JWT token.
-
-### `client.set(key: string, value: any, options?: { ttl?: number, validate?: boolean }): Promise<any>`
-Stores a key-value pair. Optional TTL and validation.
-
-### `client.get(key: string): Promise<any>`
-Retrieves a value by key from the server.
-
-### `client.upsert(key: string, value: any, options?: { ttl?: number, errorOnExists?: boolean }): Promise<any>`
-Adds or updates a value.
-
-### `client.config(settings: { strict: boolean, logLevel: number }): Promise<void>`
-Reconfigures the server with new settings.
-
----
-
-## 🌐 Server Requirements
-
-This module assumes the server is running at:
-
-- **Hub**: `http://localhost:5000/hub/cache`
-- **Auth**: `http://localhost:5000/api/authenticate`
-
-The server must return a valid JWT token when posting to `/api/authenticate`.
-
----
-
-## 📁 File Location
-
-This file is intended to live in `src/client.ts` or be imported as a library module in your TypeScript project.
-
----
-
-## 🧪 Testing
-
-You can use the provided `test.ts` script for testing client methods. Compile and run with:
-
-```bash
-npx tsc
-node src/test.js
-```
-
----
-
-## 📜 License
-
-Provided as part of a learning assignment. You may reuse or extend as needed.
-
----
-
-## ▶️ Starting the Server for Testing
-
-To test this client, you must start the accompanying SignalR server from the `/server` directory.
-
-### Prerequisites
-- [.NET 6 SDK](https://dotnet.microsoft.com/download)
-
-### Steps
-
-```bash
-cd ../server
-dotnet restore
-dotnet run
-```
-
-The server will listen on:
-- SignalR Hub: `http://localhost:5000/hub/cache`
-- Auth endpoint: `http://localhost:5000/api/authenticate`
-
-Make sure the server is running **before** executing the client code.
-
----
+- The `client.ts` file abstracts all connection/auth details.
+- The `test.ts` shows how to use it with real server endpoints.
+- The client expects the server to be running with JWT-based auth and a SignalR hub at `/hub/cache`.
