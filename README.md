@@ -85,7 +85,7 @@ You can use the provided `test.ts` script for testing client methods. Compile an
 
 ```bash
 npx tsc
-node dist/test.js
+node src/test.js
 ```
 
 ---
