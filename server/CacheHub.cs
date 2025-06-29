@@ -95,7 +95,7 @@ public class CacheHub : Hub
 
     public async Task<Response> Get(string key)
     {
-        // Спробувати дістати з кешу або з джерела
+        // get data from cache or storage
         var value = await _cache.GetOrFetchAsync<object?>(
             key,
             async () =>
@@ -111,10 +111,10 @@ public class CacheHub : Hub
                 }
                 return fetched;
             },
-            TimeSpan.FromMinutes(10) // TTL за замовчуванням
+            TimeSpan.FromMinutes(10) // TTL as default 
         );
 
-        // Якщо все ще null — не знайдено
+        // no data
         if (value == null)
             return Response.Fail("Key not found");
 
