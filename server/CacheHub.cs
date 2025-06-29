@@ -76,11 +76,17 @@ public class CacheHub : Hub
             return false;
         }
     }
+    
+    public class UpsertOptions
+    {
+        public int Ttl { get; set; } = 3600000;
+        public bool ErrorOnExists { get; set; } = false;
+    }
 
     public async Task<Response> Set(string key, string value, int ttl = 3600000)
     {
         if (_config.Strict && !IsPrimitiveOrJson(value))
-        return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
+            return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
 
         var existing = await _dataSource.FetchAsync(key);
         if (existing != null)
@@ -121,19 +127,25 @@ public class CacheHub : Hub
         return Response.Ok(value);
     }
 
-    public async Task<Response> Upsert(string key, string value, int ttl = 3600000)
+    public async Task<Response> Upsert(string key, string value, UpsertOptions? options)
     {
+        var ttl = options?.Ttl ?? 3600000;
+        var errorOnExists = options?.ErrorOnExists ?? false;
+
         if (_config.Strict && !IsPrimitiveOrJson(value))
-        return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
+            return Response.Fail("Strict mode is enabled: value must be primitive or valid JSON.");
 
-        var existing = await _dataSource.FetchAsync(key);
+        // check for it exists
+        var exists = await _dataSource.ExistsAsync(key);
+        if (errorOnExists && exists)
+        {
+            Log(LogLevelEnum.WARNING, $"[UPSERT] Key '{key}' already exists. errorOnExists=true -> rejecting.");
+            return Response.Fail("Key already exists and 'errorOnExists' is true.");
+        }
 
-        if (existing != null)
-            Log(LogLevelEnum.INFO, $"[UPSERT] Key '{key}' exists in data source. Updating.");
-        else
-            Log(LogLevelEnum.INFO, $"[UPSERT] Key '{key}' not found in data source. Creating new entry.");
-
+        // save to storage
         await _dataSource.SaveAsync(key, value);
+        // update cache
         await _cache.GetOrFetchAsync(key, () => Task.FromResult<object?>(value), TimeSpan.FromMilliseconds(ttl));
 
         return Response.Ok();

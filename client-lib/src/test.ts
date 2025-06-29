@@ -22,6 +22,16 @@ async function main() {
         // Update the value or insert if not exists
         await client.upsert("exampleKey", '{"updated":true}');
 
+        // First upsert (should work)
+        await client.upsert("exampleKey", '{"updated":true}', { errorOnExists: false });
+        // This upsert should fail because errorOnExists = true and the key exists
+        const result = await client.upsert("exampleKey", '{"shouldFail":true}', { errorOnExists: true });
+        if (!result.success) {
+            console.warn("[EXPECTED FAILURE]", result.error?.details ?? "Unknown error");
+        } else {
+            console.error("[UNEXPECTED SUCCESS] Upsert should have failed but didn't.");
+        }
+
         // Retrieve again
         await client.get("exampleKey");
     } 

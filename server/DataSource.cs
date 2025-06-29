@@ -14,9 +14,14 @@ public class DataSource
         return Task.FromResult(value);
     }
 
-     public Task SaveAsync(string key, object value)
+    public Task SaveAsync(string key, object value)
     {
         _data[key] = value;
         return Task.CompletedTask;
+    }
+
+    public Task<bool> ExistsAsync(string key)
+    {
+        return Task.FromResult(_data.ContainsKey(key));
     }
 }

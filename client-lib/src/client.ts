@@ -1,6 +1,11 @@
 import * as signalR from "@microsoft/signalr";
 import Joi from "joi";
 
+interface UpsertOptions {
+    ttl?: number;
+    errorOnExists?: boolean;
+}
+
 export class AuthJoiClient {
     private connection: signalR.HubConnection;
     private token: string | null = null;
@@ -76,8 +81,8 @@ export class AuthJoiClient {
         return result;
     }
 
-    async upsert(key: string, value: string, ttl: number = 3600000) {
-        const result = await this.connection.invoke("Upsert", key, value, ttl);
+    async upsert(key: string, value: string, options?: UpsertOptions) {
+        const result = await this.connection.invoke("Upsert", key, value, options);
         console.log("[UPSERT]", result);
         return result;
     }
